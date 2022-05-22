@@ -1,0 +1,2 @@
+netsquid==1.*
+pyp4

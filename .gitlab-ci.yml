@@ -1,0 +1,71 @@
+# 3.6: Use the oldest supported Python version.
+# https://devguide.python.org/#status-of-python-branches
+# 3.8: pyp4 requires python3.8
+image: python:3.8
+
+before_script:
+  - source venv/bin/activate
+
+.default:
+  only:
+    - main
+    - merge_requests
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - venv/
+    policy: pull
+
+stages:
+  - prepare
+  - tests
+  - lint
+
+# The prepare job exists to ensure the cache exists for the subsequent jobs.
+# Otherwise if the first job fails, all dependencies would have to be
+# re-downloaded.
+prepare:
+  extends: .default
+  stage: prepare
+  before_script:
+    - python3 -m pip install virtualenv
+    - if [ ! -d venv ]; then python3 -m virtualenv venv; fi
+    - source venv/bin/activate
+  script:
+    - rm -rf venv/pyp4
+    - git clone https://${pyp4_username}:${pyp4_token}@gitlab.tudelft.nl/qp4/pyp4.git venv/pyp4
+    - python3 -m pip install -e venv/pyp4
+    - make python-deps
+    - make test-deps
+    - make example-deps
+  cache:
+    policy: pull-push
+
+test:
+  extends: .default
+  stage: tests
+  script: make tests COVREP=
+  artifacts:
+    paths:
+      - .coverage
+    expire_in: 1 week
+
+examples:
+  extends: .default
+  stage: tests
+  script: make examples
+
+coverage:
+  extends: .default
+  stage: lint
+  script: make coverage MINCOV=100
+
+flake8:
+  extends: .default
+  stage: lint
+  script: make flake8
+
+pylint:
+  extends: .default
+  stage: lint
+  script: make pylint

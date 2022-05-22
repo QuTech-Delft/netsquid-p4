@@ -1,0 +1,30 @@
+network: ping_pong
+
+components:
+
+  host:
+    type: host
+    properties:
+      port_names:
+        - "0"
+
+  switch:
+    type: v1model
+    properties:
+      port_names:
+        - "0"
+
+  connection:
+    type: classical_connection
+
+    properties:
+      length: 1
+      p_loss_init: 0
+      p_loss_length: 0
+
+    connect_to:
+      node1: host
+      node2: switch
+      port_name_node1: "0"
+      port_name_node2: "0"
+      label: connection

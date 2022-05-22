@@ -1,0 +1,7 @@
+__pycache__
+.virtualenvs
+logs
+env
+htmlcov
+.coverage
+*.p4i

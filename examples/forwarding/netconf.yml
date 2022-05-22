@@ -1,0 +1,130 @@
+network: forwarding
+
+node: &node
+  type: v1model
+  properties:
+    port_names:
+      - "1"
+      - "2"
+      - "3"
+      - "4"
+
+host: &host
+  type: host
+  properties:
+    port_names:
+      - "1"
+
+fibre: &fibre
+  type: classical_connection
+
+  properties:
+    length: 0.01
+    p_loss_init: 0
+    p_loss_length: 0
+
+components:
+
+  s1:
+    << : *node
+
+  s2:
+    << : *node
+
+  s3:
+    << : *node
+
+  s4:
+    << : *node
+
+  h1:
+    << : *host
+
+  h2:
+    << : *host
+
+  h3:
+    << : *host
+
+  h4:
+    << : *host
+
+  s1toh1:
+    << : *fibre
+
+    connect_to:
+      node1: s1
+      node2: h1
+      port_name_node1: "1"
+      port_name_node2: "1"
+      label: s1toh1
+
+  s1toh2:
+    << : *fibre
+
+    connect_to:
+      node1: s1
+      node2: h2
+      port_name_node1: "2"
+      port_name_node2: "1"
+      label: s1toh2
+
+  s1tos3:
+    << : *fibre
+
+    connect_to:
+      node1: s1
+      node2: s3
+      port_name_node1: "3"
+      port_name_node2: "1"
+      label: s1tos3
+
+  s1tos4:
+    << : *fibre
+
+    connect_to:
+      node1: s1
+      node2: s4
+      port_name_node1: "4"
+      port_name_node2: "2"
+      label: s1tos4
+
+  s2toh3:
+    << : *fibre
+
+    connect_to:
+      node1: s2
+      node2: h3
+      port_name_node1: "1"
+      port_name_node2: "1"
+      label: s1toh3
+
+  s2toh4:
+    << : *fibre
+
+    connect_to:
+      node1: s2
+      node2: h4
+      port_name_node1: "2"
+      port_name_node2: "1"
+      label: s1toh4
+
+  s2tos3:
+    << : *fibre
+
+    connect_to:
+      node1: s2
+      node2: s3
+      port_name_node1: "4"
+      port_name_node2: "2"
+      label: s2tos3
+
+  s2tos4:
+    << : *fibre
+
+    connect_to:
+      node1: s2
+      node2: s4
+      port_name_node1: "3"
+      port_name_node2: "1"
+      label: s2tos4
