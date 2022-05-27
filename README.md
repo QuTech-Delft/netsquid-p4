@@ -1,9 +1,9 @@
 # Netsquid P4
 
 [![pipeline
-status](https://gitlab.tudelft.nl/qp4/netsquid-p4/badges/master/pipeline.svg)](https://gitlab.tudelft.nl/qp4/netsquid-p4/commits/master)
+status](https://gitlab.tudelft.nl/qp4/netsquid-p4/badges/main/pipeline.svg)](https://gitlab.tudelft.nl/qp4/netsquid-p4/commits/main)
 [![coverage
-report](https://gitlab.tudelft.nl/qp4/netsquid-p4/badges/master/coverage.svg)](https://gitlab.tudelft.nl/qp4/netsquid-p4/commits/master)
+report](https://gitlab.tudelft.nl/qp4/netsquid-p4/badges/main/coverage.svg)](https://gitlab.tudelft.nl/qp4/netsquid-p4/commits/main)
 
 ## 3rd P4 Workshop in Europe (EuroP4)
 
