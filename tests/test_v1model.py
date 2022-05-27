@@ -37,50 +37,34 @@ def node(program_file_name):
     return node
 
 
-def test_too_large_port(process, node):
-    # Ports that exceed the maximum allowed value should not be connected to the P4device.
-    port_name = str(P4Device.P4_MAX_PORT + 1)
+def test_invalid_ports(process, node):
+    invalid_port_names = [
+        # Ports that exceed the maximum allowed value.
+        str(P4Device.P4_MAX_PORT + 1),
+        # Ports that are not integers.
+        "port",
+        # Ports that are not reversibly convertible back to a string.
+        "0x10",
+    ]
 
-    # Adding to the device directly should raise an error.
-    with pytest.raises(ValueError):
-        node.p4device.add_ports([port_name])
+    for port_name in invalid_port_names:
+        # Adding to the device directly should raise an error.
+        with pytest.raises(ValueError):
+            node.p4device.add_ports([port_name])
 
-    # Adding to the node should not raise an error, but should not be added to the device.
-    node.add_ports([port_name])
-    assert port_name in node.ports
-    assert port_name not in node.p4device.ports
+        # Adding to the node should not raise an error, but should not be added to the device.
+        node.add_ports([port_name])
+        assert port_name in node.ports
+        assert port_name not in node.p4device.ports
 
-    # Inject something into the node - nothing should happen.
-    for port in node.ports.values():
-        port.bind_output_handler(assert_handler)
-    hdr = process.header("ping")
-    hdr["ttl"].val = 100
-    ping = HeaderStack()
-    ping.push(hdr)
-    node.ports[port_name].tx_input(ping)
-
-
-def test_non_int_port(process, node):
-    # Ports that are nto integers should not be connected to the P4device.
-    port_name = "port"
-
-    # Adding to the device directly should raise an error.
-    with pytest.raises(ValueError):
-        node.p4device.add_ports([port_name])
-
-    # Adding to the node should not raise an error, but should not be added to the device.
-    node.add_ports([port_name])
-    assert port_name in node.ports
-    assert port_name not in node.p4device.ports
-
-    # Inject something into the node - nothing should happen.
-    for port in node.ports.values():
-        port.bind_output_handler(assert_handler)
-    hdr = process.header("ping")
-    hdr["ttl"].val = 100
-    ping = HeaderStack()
-    ping.push(hdr)
-    node.ports[port_name].tx_input(ping)
+        # Inject something into the node - nothing should happen.
+        for port in node.ports.values():
+            port.bind_output_handler(assert_handler)
+        hdr = process.header("ping")
+        hdr["ttl"].val = 100
+        ping = HeaderStack()
+        ping.push(hdr)
+        node.ports[port_name].tx_input(ping)
 
 
 def test_ping(ns, process, device):

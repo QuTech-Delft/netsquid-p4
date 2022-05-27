@@ -49,21 +49,21 @@ class V1ModelDevice(P4Device):
     def _create_process(self, program):
         return V1ModelProcess(f"{self.name}-V1ModelProcess", program, pyp4.PacketIO.STACK)
 
-    def cnetwork_process(self, port_name, packet):
+    def cnetwork_process(self, port_index, packet):
         """Process an incoming classical network packet.
 
         Parameters
         ----------
-        port_name : `str`
-            The name of the port the packet arrived on. Must be convertible to an `int`.
+        port_index : `int`
+            The index of the port the packet arrived on.
         packet : `~pyp4.packet.HeaderStack`
             The incoming packet.
 
         """
-        port_meta = V1ModelPortMeta(standard_metadata={"ingress_port": int(port_name)})
+        port_meta = V1ModelPortMeta(standard_metadata={"ingress_port": port_index})
         port_packets = self._p4_processor.input(port_meta, packet)
         for port_meta, packet_out in port_packets:
-            self._cnetwork_execute(str(port_meta.standard_metadata["egress_port"]), packet_out)
+            self._cnetwork_execute(port_meta.standard_metadata["egress_port"], packet_out)
 
 
 class V1ModelRuntime(V1ModelRuntimeAbc, NetsquidRuntime):
