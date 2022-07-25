@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2022-07-25
+
 - Initial split into simulator-specific code (this repository) and non-simulator-specific code
   ([PyP4](https://gitlab.tudelft.nl/qp4/pyp4)).
 - Furthermore:
