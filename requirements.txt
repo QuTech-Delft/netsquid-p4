@@ -1,2 +1,2 @@
 netsquid==1.*
-pyp4
+git+ssh://git@gitlab.tudelft.nl/qp4/pyp4.git@v0.1.0#egg=pyp4

@@ -1,7 +1,5 @@
 __pycache__
-.virtualenvs
-logs
-env
-htmlcov
+.pytest_cache
 .coverage
+htmlcov
 *.p4i

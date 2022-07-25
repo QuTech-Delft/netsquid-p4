@@ -18,7 +18,7 @@ before_script:
 
 stages:
   - prepare
-  - tests
+  - test
   - lint
 
 # The prepare job exists to ensure the cache exists for the subsequent jobs.
@@ -32,40 +32,40 @@ prepare:
     - if [ ! -d venv ]; then python3 -m virtualenv venv; fi
     - source venv/bin/activate
   script:
-    - rm -rf venv/pyp4
-    - git clone https://${pyp4_username}:${pyp4_token}@gitlab.tudelft.nl/qp4/pyp4.git venv/pyp4
-    - python3 -m pip install -e venv/pyp4
-    - make python-deps
-    - make test-deps
-    - make example-deps
+    - sed -i "s|ssh://git|https://${pyp4_username}:${pyp4_token}|g" requirements.txt
+    - make requirements
+    - make dev-requirements
   cache:
     policy: pull-push
 
-test:
+examples:
   extends: .default
-  stage: tests
+  stage: test
+  script: make examples
+
+tests:
+  extends: .default
+  stage: test
   script: make tests COVREP=
   artifacts:
     paths:
       - .coverage
     expire_in: 1 week
 
-examples:
-  extends: .default
-  stage: tests
-  script: make examples
-
 coverage:
   extends: .default
   stage: lint
   script: make coverage MINCOV=100
+  needs: ["tests"]
 
 flake8:
   extends: .default
   stage: lint
   script: make flake8
+  needs: ["prepare"]
 
 pylint:
   extends: .default
   stage: lint
   script: make pylint
+  needs: ["prepare"]
