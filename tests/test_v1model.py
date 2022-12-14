@@ -115,7 +115,7 @@ def test_ping(ns, process, device):
         assert hdr["last_time"] == verif["last_time"]
 
         # We send the ping in 2 microsecond intervals.
-        verif["cur_time"].val += (2_000 if device.name == "v1quantum" else 2)
+        verif["cur_time"].val += 2
         assert "cur_time" in hdr
         assert hdr["cur_time"] == verif["cur_time"]
 

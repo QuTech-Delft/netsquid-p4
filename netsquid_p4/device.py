@@ -2,9 +2,13 @@
 
 from abc import ABC, abstractmethod
 import json
+from typing import Dict, List, Optional
 
-from netsquid.components.component import Component
+from netsquid.components.component import Component, Port
 from netsquid.protocols import Protocol
+from pyp4.packet import HeaderStack
+from pyp4.processor import Process, Processor
+from pyp4.table import Table
 
 import netsquid as ns
 
@@ -14,37 +18,38 @@ class P4Device(ABC, Component):
 
     Parameters
     ----------
-    name : `str`
+    name
         The name for this device.
-    p4_processor : `~pyp4.processor.Processor`
+    p4_processor : pyp4.processor.Processor
         The P4 processor loaded with the P4 program.
-    port_names : list of `str`, optional
+    port_names : optional
         The names of the ports to add during construction.
 
     """
 
     P4_MAX_PORT = 0x1FF
+    """Maximum allowed P4 port number."""
 
-    def __init__(self, name, p4_processor, port_names=None):
+    def __init__(self, name: str, p4_processor: Processor, port_names: Optional[List[str]] = None):
         self.__port_protocols = {}
         Component.__init__(self, name, port_names=port_names)
         self.__p4_processor = p4_processor
 
     @property
-    def _p4_processor(self):
+    def _p4_processor(self) -> Processor:
         return self.__p4_processor
 
-    def load(self, program_file_name):
+    def load(self, program_file_name: str) -> 'P4Device':
         """Load a P4 program onto the device processor.
 
         Parameters
         ----------
-        program_file_name : `str`
+        program_file_name
             The file name with the P4 program in BM JSON format.
 
         Returns
         -------
-        `netsquid_p4.device.Device`
+        :
             For convenience the device itself is returned.
 
         """
@@ -59,24 +64,24 @@ class P4Device(ABC, Component):
         self._p4_processor.unload()
 
     @abstractmethod
-    def _create_process(self, program):
+    def _create_process(self, program: Dict) -> Process:
         raise NotImplementedError
 
-    def table(self, block, name):
+    def table(self, block: str, name: str) -> Table:
         """Access a table in the P4 processor.
 
         Parameters
         ----------
-        block : `str`
+        block
             The name of the block in which the table is defined. Note that the name is defined by
             the architecture, not the program itself. E.g. the ingress block is called "ingress"
             regardless of how that block is called in the program.
-        name : `str`
+        name
             The name of the table as defined by the program.
 
         Returns
         -------
-        `pyp4.table.Table`
+        pyp4.table.Table
              The table.
 
         """
@@ -85,17 +90,17 @@ class P4Device(ABC, Component):
         except ValueError as verr:
             raise ValueError(f"Device {self.name} failed to access table :: {verr}") from verr
 
-    def add_ports(self, names):
+    def add_ports(self, names: List[str]) -> List[Port]:
         """Add ports to this component.
 
         Parameters
         ----------
-        names : list of `str`
+        names
             List of the port names to add.
 
         Returns
         -------
-        `List[~netsquid.components.component.Port]`
+        List[netsquid.components.component.Port]
             List of the ports with the given names.
 
         """
@@ -113,20 +118,19 @@ class P4Device(ABC, Component):
         return new_ports
 
     @staticmethod
-    def validate_port_name(port_name):
+    def validate_port_name(port_name: str) -> None:
         """Check whether the given port name is valid for a P4Device.
 
-        Valid port names are positive integers that are less than or equal to
-        `netsquid_p4.device.P4Device.P4_MAX_PORT`.
+        Valid port names are positive integers that are less than or equal to `P4_MAX_PORT`.
 
         Parameters
         ----------
-        port_name : `str`
+        port_name
             The port name to validate.
 
         Raises
         ------
-        `ValueError`
+        ValueError
              If the port name is not valid.
 
         """
@@ -147,27 +151,27 @@ class P4Device(ABC, Component):
             )
 
     @abstractmethod
-    def cnetwork_process(self, port_index, packet):
+    def cnetwork_process(self, port_index: int, packet: HeaderStack) -> None:
         """Process an incoming classical network packet.
 
         Parameters
         ----------
-        port_index : `int`
+        port_index
             The index of the port the packet arrived on.
-        packet : `~pyp4.packet.HeaderStack`
+        packet : pyp4.packet.HeaderStack
             The incoming packet.
 
         """
         raise NotImplementedError
 
-    def _cnetwork_execute(self, port_index, packet):
+    def _cnetwork_execute(self, port_index: int, packet: HeaderStack) -> None:
         """Send out a classical network packet generated by the P4 processor.
 
         Parameters
         ----------
-        port_index : `int`
+        port_index
             The index of the egress port.
-        packet : `~pyp4.packet.HeaderStack`
+        packet : pyp4.packet.HeaderStack
             Outgoing packet.
 
         """
@@ -179,20 +183,20 @@ class PortProtocol(Protocol):
 
     Parameters
     ----------
-    device : `netsquid_p4.device.P4Device`
+    device
         The device on which this protocol is running.
-    port : `~netsquid.components.component.Port`
+    port : netsquid.components.component.Port
         The port to listen on.
 
     """
 
-    def __init__(self, device, port):
+    def __init__(self, device: P4Device, port: Port):
         super().__init__(f"{device.name}-{port.name}")
         self.__device = device
         self.__port = port
         self.__port_index = int(port.name, 0)
 
-    def run(self):
+    def run(self) -> None:
         """Run the protocol."""
         while True:
             yield self.await_port_input(self.__port)
@@ -205,21 +209,21 @@ class NetsquidRuntime:
 
     Parameters
     ----------
-    magnitude : `float`, optional
+    magnitude : optional
         Time magnitude to use. Default is nanoseconds.
     """
 
-    def __init__(self, magnitude=ns.NANOSECOND):
+    def __init__(self, magnitude: float = ns.NANOSECOND):
         super().__init__()
         self.__magnitude = magnitude
         self.__start_time = ns.sim_time(magnitude)
 
-    def time(self):
+    def time(self) -> int:
         """Get the simulated time.
 
         Returns
         -------
-        `int`
+        :
             The current time on the device. The clock must be set to 0 every time the switch starts.
 
         """

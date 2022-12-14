@@ -1,6 +1,9 @@
 """A basic classical switch based on the v1model P4 architecture."""
 
+from typing import Dict, List, Optional
 import netsquid as ns
+from pyp4.packet import HeaderStack
+from pyp4.processor import Process
 from pyp4.processors.v1model import (
     V1ModelProcessor,
     V1ModelRuntimeAbc,
@@ -18,14 +21,14 @@ class V1ModelNode(P4Node):
 
     Parameters
     ----------
-    name : `str`
+    name
         The name for this node.
-    port_names : list of `str`, optional
+    port_names : optional
         The names of the ports to add during construction.
 
     """
 
-    def __init__(self, name, port_names):
+    def __init__(self, name: str, port_names: Optional[List[str]] = None):
         super().__init__(name, V1ModelDevice(f"{name}-v1model-device"), port_names=port_names)
 
 
@@ -34,29 +37,29 @@ class V1ModelDevice(P4Device):
 
     Parameters
     ----------
-    name : `str`
+    name
         The name for this device.
-    port_names : list of `str`, optional
+    port_names : optional
         The names of the ports to add during construction.
 
     """
 
-    def __init__(self, name, port_names=None):
+    def __init__(self, name: str, port_names: Optional[List[str]] = None):
         runtime = V1ModelRuntime()
         p4_processor = V1ModelProcessor(runtime)
         super().__init__(name, p4_processor, port_names=port_names)
 
-    def _create_process(self, program):
+    def _create_process(self, program: Dict) -> Process:
         return V1ModelProcess(f"{self.name}-V1ModelProcess", program, pyp4.PacketIO.STACK)
 
-    def cnetwork_process(self, port_index, packet):
+    def cnetwork_process(self, port_index: int, packet: HeaderStack) -> None:
         """Process an incoming classical network packet.
 
         Parameters
         ----------
-        port_index : `int`
+        port_index
             The index of the port the packet arrived on.
-        packet : `~pyp4.packet.HeaderStack`
+        packet : pyp4.packet.HeaderStack
             The incoming packet.
 
         """
@@ -67,18 +70,18 @@ class V1ModelDevice(P4Device):
 
 
 class V1ModelRuntime(V1ModelRuntimeAbc, NetsquidRuntime):
-    """The simulation runtime for the V1Quantum switch."""
+    """The simulation runtime for the V1Model switch."""
 
     def __init__(self):
         V1ModelRuntimeAbc.__init__(self)
         NetsquidRuntime.__init__(self, ns.MICROSECOND)
 
-    def time(self):
+    def time(self) -> int:
         """Get the simulated time.
 
         Returns
         -------
-        `int`
+        :
             The current time on the device in microseconds. The clock must be set to 0 every time
             the switch starts.
 

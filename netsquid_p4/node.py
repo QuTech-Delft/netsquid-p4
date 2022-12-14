@@ -1,6 +1,8 @@
 """Convenience base class for P4 nodes."""
 
-from netsquid.nodes.node import Node
+from typing import List, Optional
+from netsquid.components.component import Port
+from netsquid.nodes.node import Node, QuantumMemory
 
 from netsquid_p4.device import P4Device
 
@@ -19,20 +21,27 @@ class P4Node(Node):
 
     Parameters
     ----------
-    name : `str`
+    name
         Name of node for display purposes.
-    p4device : `netsquid_p4.device.P4Device`
+    p4device
         The P4Device running a P4 processor.
-    ID : `int`, optional
+    ID : optional
         Unique identifier for node e.g. its IP address.
-    qmemory : `~netsquid.components.qmemory.QuantumMemory`, optional
+    qmemory : netsquid.components.qmemory.QuantumMemory, optional
         The primary quantum memory component (or a derivative thereof) on this node.
-    port_names : `List[str]`, optional
+    port_names : optional
         Names of additional ports to add to this component.
 
     """
 
-    def __init__(self, name, p4device, ID=None, qmemory=None, port_names=None):
+    def __init__(
+            self,
+            name: str,
+            p4device: P4Device,
+            ID: int = None,
+            qmemory: Optional[QuantumMemory] = None,
+            port_names: Optional[List[str]] = None,
+    ):
         # pylint: disable=too-many-arguments
         super().__init__(name, ID=ID, qmemory=qmemory)
         self.__p4device = p4device
@@ -40,11 +49,11 @@ class P4Node(Node):
         self.add_ports(port_names)
 
     @property
-    def p4device(self):
-        """`netsquid_p4.device.P4Device`: The P4Device subcomponent."""
+    def p4device(self) -> P4Device:
+        """The P4Device subcomponent."""
         return self.__p4device
 
-    def add_ports(self, names):
+    def add_ports(self, names: List[str]) -> List[Port]:
         """Add ports to this component.
 
         For port names that are valid P4Device port names, a port with the same name will be added
@@ -53,12 +62,12 @@ class P4Node(Node):
 
         Parameters
         ----------
-        names : `List[str]`
+        names
             Names of ports.
 
         Returns
         -------
-        `List[~netsquid.components.component.Port]`
+        List[netsquid.components.component.Port]
             List of the ports with the given names.
 
         """

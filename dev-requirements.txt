@@ -1,5 +1,0 @@
-pytest
-pytest-cov
-flake8
-pylint
-netsquid_netconf
