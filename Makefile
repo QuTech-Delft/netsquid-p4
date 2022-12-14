@@ -2,37 +2,43 @@ PYTHON       = python3
 SOURCEDIR    = netsquid_p4
 TESTDIR      = tests
 COVREP       = term
-MINCOV       = 0
+MINCOV       = 100
 PIP_FLAGS    = --extra-index-url=https://${NETSQUIDPYPI_USER}:${NETSQUIDPYPI_PWD}@pypi.netsquid.org
 
 help:
-	@echo "requirements      Install the package requirements."
-	@echo "dev-requirements  Install extra requirements for development."
-	@echo "examples          Run all the examples."
+	@echo "dependencies      Install the package dependencies."
+	@echo "dependencies.dev  Install additional package dependencies for development."
+	@echo "dependencies.docs Install additional package dependencies for documentation."
+	@echo "examples          Run the examples."
 	@echo "tests             Run the tests."
 	@echo "coverage          Print the coverage report."
-	@echo "cov-html          Open the coverage report produced using `make tests COVREP=html`."
+	@echo "cov-html          Open the coverage report produced by 'make tests COVREP=html'."
 	@echo "flake8            Run the flake8 linter."
 	@echo "pylint            Run the pylint linter."
-	@echo "clean             Removes all temporary files (such as .pyc and __pycache__)."
+	@echo "clean             Remove all temporary files."
+	@echo "distclean         Remove all temporary and build files."
 	@echo "verify            Verify the project by running tests and linters."
 
 _check_variables:
 ifndef NETSQUIDPYPI_USER
-	$(error Set the environment variable NETSQUIDPYPI_USER before uploading)
+	$(error Set the environment variable NETSQUIDPYPI_USER)
 endif
 ifndef NETSQUIDPYPI_PWD
-	$(error Set the environment variable NETSQUIDPYPI_PWD before uploading)
+	$(error Set the environment variable NETSQUIDPYPI_PWD)
 endif
 
-requirements: _check_variables
-	@$(PYTHON) -m pip install --upgrade -r requirements.txt ${PIP_FLAGS}
+dependencies: _check_variables
+	@$(PYTHON) -m pip install --upgrade -e . ${PIP_FLAGS}
 
-dev-requirements: _check_variables
-	@$(PYTHON) -m pip install --upgrade -r dev-requirements.txt ${PIP_FLAGS}
+dependencies.dev: _check_variables
+	@$(PYTHON) -m pip install --upgrade -e .[dev] ${PIP_FLAGS}
+
+dependencies.docs:
+	@$(PYTHON) -m pip install --upgrade -e .[docs]
 
 examples:
-	@$(PYTHON) -m examples.run_examples > /dev/null && echo "Examples OK!" || (echo "Examples failed!" && /bin/false)
+	@$(PYTHON) -m examples.run_examples > /dev/null && echo "Examples OK!" || \
+	(echo "Examples failed!" && /bin/false)
 
 tests:
 	@$(PYTHON) -m pytest -v --cov=${SOURCEDIR} --cov-report=${COVREP} ${TESTDIR}
@@ -56,9 +62,18 @@ clean:
 	@/usr/bin/rm -f .coverage
 	@/usr/bin/rm -rf htmlcov
 
+distclean: clean
+	@/usr/bin/rm -rf *.egg-info
+	@/usr/bin/rm -rf build
+	@/usr/bin/rm -rf dist
+
 _verified:
 	@echo "The package has been successfully verified"
 
-verify: clean requirements dev-requirements tests coverage flake8 pylint _verified
+verify: clean dependencies dependencies.dev tests examples coverage flake8 pylint _verified
 
-.PHONY: _check_variables requirements dev-requirements examples tests coverage cov-html flake8 pylint clean verify _verified
+build: distclean verify
+	@$(PYTHON) -m build
+
+.PHONY: _check_variables dependencies dependencies.dev dependencies.docs examples tests coverage \
+	cov-html flake8 pylint clean distclean verify _verified
