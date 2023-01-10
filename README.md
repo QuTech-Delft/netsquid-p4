@@ -26,8 +26,8 @@ All P4 examples and test programs have been pre-compiled using the BMv2 backend 
 repository. If you wish to compile your own programs, please use a suitable P4 compiler. The
 [p4lang/p4c](https://github.com/p4lang/p4c) can compile the classical architectures, such as
 V1model, provided by [PyP4](https://gitlab.tudelft.nl/qp4/pyp4). To compile custom architectures,
-such as [PyP4-V1Quantum](https://gitlab.tudelft.nl/qp4/pyp4-v1quantum), you will need a suitable
-compiler fork. Please refer to the documentation of the relevant architecture.
+such as [V1Quantum](https://gitlab.tudelft.nl/qp4/v1quantum), you will need a suitable compiler
+fork. Please refer to the documentation of the relevant architecture.
 
 ## Documentation
 
