@@ -20,7 +20,7 @@ version = "1.0.0"
 requires-python = ">=3.8"
 dependencies = [
     "netsquid >= 1.1.6, < 2",
-    "pyp4 @ git+ssh://git@gitlab.tudelft.nl/qp4/pyp4.git",
+    "pyp4 @ git+ssh://git@github.com:QuTech-Delft/pyp4.git",
 ]
 
 [project.optional-dependencies]
